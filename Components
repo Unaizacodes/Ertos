@@ -1,0 +1,55 @@
+Components
+
+#Led with switch
+* 80c51
+* button - active push button
+* resistors - 0.6 metal film (subcategory) - M100k
+* led - green - active - animated
+from terminal mode
+* power - +5V
+* ground
+
+# 7 segment
+* AT80c51RD2 or 89c51
+* 7 segment display common cathod
+
+# motor interface (speed and direction control)
+* arduino uno
+* L293D (Analog - push pull)
+* Motor (ACtive simple DC motor)
+* Power - 1. +5V 2. +12V
+* ground
+
+# stepper motor
+* arduino uno
+* ULN2003A (Analog - highvoltage)
+* motor stepper (Animated unipolar)
+* power - +12V
+
+# power management
+* arduino uno
+* led- green
+* virtual terminal
+* DHT11 (DHT11 library TRXD humidity and temparature sensor)
+
+# freeRtos
+* arduino uno
+* led green
+* virtual terminal
+* ground
+* power - +5V
+* potentiometer - category-(resister) - POT - device 
+
+
+# freeRtos multiple task
+*arduino uno
+*led-green
+*led-red (active animated)
+*virtual terminal
+*ground
+
+# queue  management
+* arduino uno - R3v.10
+* potentiometer - category-(resister) - POT - device 
+* led - red (active terminal)
+* virtual terminal (at virtual instrumentation terminal)
