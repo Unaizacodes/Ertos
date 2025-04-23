@@ -1,0 +1,538 @@
+# code forn chatgot after copy form google classrooom remove the error slike character and etc from chatgpt but confirm it from file
+
+# led (.c)
+#include <reg51.h>
+
+sbit switch1 = P1^5;
+sbit led1 = P1^1;
+
+void main(void)
+{
+    led1 = 0;       // make led an output
+    switch1 = 1;    // make switch as input
+
+    while (1)
+    {
+        if (switch1 == 0)
+        {
+            led1 = 1;
+        }
+        else
+        {
+            led1 = 0;
+        }
+    }
+}
+
+# 7segment (.asm)
+ORG 4000H
+DB 3FH, 06H, 5BH, 4FH, 66H, 6DH, 7DH, 07H, 7FH, 6FH, 0
+; Lookup table for digits 0 to 9
+
+ORG 0000H
+main:       MOV DPTR, #4000H
+
+repeat:     CLR A
+            MOVC A, @A+DPTR      ; Copy data from external location to accumulator
+            MOV P2, A            ; Move the pattern of the digit into port P2
+            ACALL delay          ; Call a delay so that the transition is visible
+            INC DPTR             ; Point to the next pattern
+            CJNE A, 0, repeat    ; Repeat till 0 (Stop bit) is received
+            SJMP main            ; Run this forever till externally stopped
+
+; generate a decent enough delay between transitions
+delay:      MOV R0, #08H
+
+LP2:        MOV R1, #0FFH
+
+LP1:        MOV R2, #0FFH
+
+LP3:        DJNZ R2, LP3
+            DJNZ R1, LP1
+            DJNZ R0, LP2
+            RET
+
+END
+
+
+# interface of dc mptor (direction and speed control)
+// Motor A connections
+int enA = 9;
+int in1 = 8;
+int in2 = 7;
+
+void setup() {
+  // Set all the motor control pins to outputs
+  pinMode(enA, OUTPUT);
+  pinMode(in1, OUTPUT);
+  pinMode(in2, OUTPUT);
+
+  // Turn off motors - Initial state
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+}
+
+void loop() {
+  directionControl();
+  delay(1000);
+  speedControl();
+  delay(1000);
+}
+
+// This function lets you control spinning direction of motors
+void directionControl() {
+  // Set motors to maximum speed
+  // For PWM maximum possible values are 0 to 255
+  analogWrite(enA, 255);
+
+  // Turn on motor A
+  digitalWrite(in1, HIGH);
+  digitalWrite(in2, LOW);
+  delay(2000);
+
+  // Now change motor directions
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+  delay(2000);
+
+  // Turn off motors
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+}
+
+// This function lets you control speed of the motors
+void speedControl() {
+  // Turn on motors
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+
+  // Accelerate from zero to maximum speed
+  for (int i = 0; i < 256; i++) {
+    analogWrite(enA, i);
+    delay(20);
+  }
+
+  // Decelerate from maximum speed to zero
+  for (int i = 255; i >= 0; --i) {
+    analogWrite(enA, i);
+    delay(20);
+  }
+
+  // Now turn off motors
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+}
+
+# stepper motot
+void setup() {
+  pinMode(4, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
+  pinMode(7, OUTPUT);
+}
+
+void loop() {
+  /* Rotation in one direction */
+  for (int i = 0; i < 5; i++) {
+    digitalWrite(7, HIGH);
+    digitalWrite(6, LOW);
+    digitalWrite(5, LOW);
+    digitalWrite(4, LOW);
+    delay(100);
+
+    digitalWrite(7, LOW);
+    digitalWrite(6, HIGH);
+    digitalWrite(5, LOW);
+    digitalWrite(4, LOW);
+    delay(100);
+
+    digitalWrite(7, LOW);
+    digitalWrite(6, LOW);
+    digitalWrite(5, HIGH);
+    digitalWrite(4, LOW);
+    delay(100);
+
+    digitalWrite(7, LOW);
+    digitalWrite(6, LOW);
+    digitalWrite(5, LOW);
+    digitalWrite(4, HIGH);
+    delay(100);
+  }
+
+  /* Rotation in opposite direction */
+  for (int j = 0; j < 5; j++) {
+    digitalWrite(7, LOW);
+    digitalWrite(6, LOW);
+    digitalWrite(5, LOW);
+    digitalWrite(4, HIGH);
+    delay(100);
+
+    digitalWrite(7, LOW);
+    digitalWrite(6, LOW);
+    digitalWrite(5, HIGH);
+    digitalWrite(4, LOW);
+    delay(100);
+
+    digitalWrite(7, LOW);
+    digitalWrite(6, HIGH);
+    digitalWrite(5, LOW);
+    digitalWrite(4, LOW);
+    delay(100);
+
+    digitalWrite(7, HIGH);
+    digitalWrite(6, LOW);
+    digitalWrite(5, LOW);
+    digitalWrite(4, LOW);
+    delay(100);
+  }
+}
+
+# power management
+#include <dht.h>
+#define dataPin 2
+
+dht DHT;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(13, OUTPUT);
+  digitalWrite(13, LOW);
+}
+
+void loop() {
+  digitalWrite(13, HIGH);
+  int readData = DHT.read11(dataPin); // DHT11
+  float t = DHT.temperature;
+  float h = DHT.humidity;
+
+  Serial.print("Temperature = ");
+  Serial.print(t);
+  Serial.print(" C | ");
+  Serial.print("Humidity = ");
+  Serial.print(h);
+  Serial.println(" %");
+
+  delay(2000);
+}
+
+#include <dht.h>
+#include <LowPower.h>
+#define dataPin 2
+
+dht DHT;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(13, OUTPUT);
+  digitalWrite(13, LOW);
+}
+
+void loop() {
+  Serial.println("Get Data From DHT11");
+  delay(1000);
+
+  digitalWrite(13, HIGH);
+  int readData = DHT.read11(dataPin); // DHT11
+  float t = DHT.temperature;
+  float h = DHT.humidity;
+
+  Serial.print("Temperature = ");
+  Serial.print(t);
+  Serial.print(" C | ");
+  Serial.print("Humidity = ");
+  Serial.print(h);
+  Serial.println(" %");
+
+  delay(2000);
+
+  Serial.println("Arduino:- I am going for a Nap");
+  delay(200);
+  digitalWrite(13, LOW);
+
+  LowPower.idle(
+    SLEEP_8S, 
+    ADC_OFF, TIMER2_OFF, TIMER1_OFF, 
+    TIMER0_OFF, SPI_OFF, USART0_OFF, TWI_OFF
+  );
+
+  Serial.println("Arduino:- Hey I just Woke up");
+  Serial.println("");
+  delay(2000);
+}
+
+#porting of free RTOS
+#include <Arduino_FreeRTOS.h>
+
+// Define two tasks for Blink & AnalogRead
+void TaskBlink(void *pvParameters);
+void TaskAnalogRead(void *pvParameters);
+
+void setup() {
+  Serial.begin(9600);
+
+  while (!Serial) {
+    ; // Wait for serial port to connect (for LEONARDO, MICRO, etc.)
+  }
+
+  // Set up two tasks to run independently.
+  xTaskCreate(
+    TaskBlink,
+    "Blink",     // Task name (for humans)
+    128,         // Stack size
+    NULL,
+    2,           // Priority (2 is higher than 1)
+    NULL
+  );
+
+  xTaskCreate(
+    TaskAnalogRead,
+    "AnalogRead",
+    128,
+    NULL,
+    1,
+    NULL
+  );
+
+  // Task scheduler starts automatically
+}
+
+void loop() {
+  // Empty. Work is done in tasks.
+}
+
+/*---------------------- Tasks ---------------------*/
+
+// Task: Blink LED
+void TaskBlink(void *pvParameters) {
+  (void) pvParameters;
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  for (;;) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second
+    digitalWrite(LED_BUILTIN, LOW);
+    vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second
+  }
+}
+
+// Task: Read analog input
+void TaskAnalogRead(void *pvParameters) {
+  (void) pvParameters;
+
+  for (;;) {
+    int sensorValue = analogRead(A0);
+    Serial.println(sensorValue);
+    vTaskDelay(1);  // 1 tick delay (~15 ms)
+  }
+}
+
+#multiple task rtos
+#include <Arduino_FreeRTOS.h>
+
+void TaskBlink1(void *pvParameters);
+void TaskBlink2(void *pvParameters);
+void Taskprint(void *pvParameters);
+
+void setup() {
+  // initialize serial communication at 9600 bits per second:
+  Serial.begin(9600);
+
+  xTaskCreate(TaskBlink1, "task1", 128, NULL, 1, NULL);
+  xTaskCreate(TaskBlink2, "task2", 128, NULL, 1, NULL);
+  xTaskCreate(Taskprint,  "task3", 128, NULL, 1, NULL);
+
+  vTaskStartScheduler();
+}
+
+void loop() {
+  // Empty because FreeRTOS handles everything
+}
+
+void TaskBlink1(void *pvParameters) {
+  pinMode(8, OUTPUT);
+
+  while (1) {
+    Serial.println("Task1");
+    digitalWrite(8, HIGH);
+    vTaskDelay(200 / portTICK_PERIOD_MS);
+    digitalWrite(8, LOW);
+    vTaskDelay(200 / portTICK_PERIOD_MS);
+  }
+}
+
+void TaskBlink2(void *pvParameters) {
+  pinMode(7, OUTPUT);
+
+  while (1) {
+    Serial.println("Task2");
+    digitalWrite(7, HIGH);
+    vTaskDelay(300 / portTICK_PERIOD_MS);
+    digitalWrite(7, LOW);
+    vTaskDelay(300 / portTICK_PERIOD_MS);
+  }
+}
+
+void Taskprint(void *pvParameters) {
+  int counter = 0;
+
+  while (1) {
+    counter++;
+    Serial.println(counter);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+}
+
+# Queue Management
+/*
+ * Example of a basic FreeRTOS queue
+ * https://www.freertos.org/Embedded-RTOS-Queues.html
+ */
+
+// Include Arduino FreeRTOS library
+#include <Arduino_FreeRTOS.h>
+// Include queue support
+#include <queue.h>
+
+// Define an Array
+int pinReadArray[4] = {0, 0, 0, 0};
+
+// Function Declarations
+void TaskBlink(void *pvParameters);
+void TaskAnalogReadPin0(void *pvParameters);
+void TaskAnalogReadPin1(void *pvParameters);
+void TaskSerial(void *pvParameters);
+
+// Declaring a global variable of type QueueHandle_t
+QueueHandle_t arrayQueue;
+
+void setup() {
+  /**
+   * Create a queue.
+   * https://www.freertos.org/a00116.html
+   */
+  arrayQueue = xQueueCreate(
+    10,             // Queue length
+    sizeof(pinReadArray) // Queue item size
+  );
+
+  if (arrayQueue != NULL) {
+    // Create task that consumes the queue if it was created.
+    xTaskCreate(TaskSerial,        // Task function
+                "PrintSerial",     // Task name
+                128,               // Stack size
+                NULL,
+                2,                 // Priority
+                NULL);
+
+    // Create task that publishes data to the queue
+    xTaskCreate(TaskAnalogReadPin0,
+                "AnalogRead1",
+                128,
+                NULL,
+                1,
+                NULL);
+
+    // Create another task that publishes data to the queue
+    xTaskCreate(TaskAnalogReadPin1,
+                "AnalogRead2",
+                128,
+                NULL,
+                1,
+                NULL);
+
+    // Blink task
+    xTaskCreate(TaskBlink,
+                "Blink",
+                128,
+                NULL,
+                0,
+                NULL);
+  }
+}
+
+void loop() {
+  // Nothing here - all handled by tasks
+}
+
+/**
+ * Analog read task for Pin A0
+ * Reads an analog input on pin 0 and sends the read value through the queue.
+ */
+void TaskAnalogReadPin0(void *pvParameters) {
+  (void) pvParameters;
+
+  for (;;) {
+    pinReadArray[0] = 0;
+    pinReadArray[1] = analogRead(A0);
+
+    // Post an item on the queue
+    xQueueSend(arrayQueue, &pinReadArray, portMAX_DELAY);
+
+    // Short delay between reads
+    vTaskDelay(1);
+  }
+}
+
+/**
+ * Analog read task for Pin A1
+ * Reads an analog input on pin 1 and sends the read value through the queue.
+ */
+void TaskAnalogReadPin1(void *pvParameters) {
+  (void) pvParameters;
+
+  for (;;) {
+    pinReadArray[2] = 1;
+    pinReadArray[3] = analogRead(A1);
+
+    // Post an item on the queue
+    xQueueSend(arrayQueue, &pinReadArray, portMAX_DELAY);
+
+    // Short delay between reads
+    vTaskDelay(1);
+  }
+}
+
+/**
+ * Serial task.
+ * Prints the received items from the queue to the serial monitor.
+ */
+void TaskSerial(void *pvParameters) {
+  (void) pvParameters;
+
+  Serial.begin(9600);
+  while (!Serial) {
+    vTaskDelay(1);
+  }
+
+  for (;;) {
+    if (xQueueReceive(arrayQueue, &pinReadArray, portMAX_DELAY) == pdPASS) {
+      Serial.print("PIN: ");
+      Serial.println(pinReadArray[0]);
+      Serial.print("value: ");
+      Serial.println(pinReadArray[1]);
+      Serial.print("PIN: ");
+      Serial.println(pinReadArray[2]);
+      Serial.print("value: ");
+      Serial.println(pinReadArray[3]);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
+    }
+  }
+}
+
+/**
+ * Blink task.
+ */
+void TaskBlink(void *pvParameters) {
+  (void) pvParameters;
+
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+
+  for (;;) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    vTaskDelay(250 / portTICK_PERIOD_MS);
+    digitalWrite(LED_BUILTIN, LOW);
+    vTaskDelay(250 / portTICK_PERIOD_MS);
+  }
+}
+
